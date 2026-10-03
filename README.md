@@ -1,26 +1,26 @@
-# 🏦 ChequeTrak — Intelligent Cheque Data Extractor
+# ChequeTrak — Intelligent Cheque Data Extractor
 
 > An AI-powered cheque processing pipeline that automatically detects, extracts, normalizes, and validates data from scanned cheque images using YOLOv8 + PaddleOCR.
 
 ---
 
-## 📌 Table of Contents
+## Table of Contents
 
-1. [Overview](#-overview)
-2. [How It Works](#-how-it-works)
-3. [System Flowchart](#-system-flowchart)
-4. [Detected Fields & Sample Output](#-detected-fields--sample-output)
-5. [Model Performance](#-model-performance-yolov8)
-6. [Tech Stack](#-tech-stack)
-7. [Repository Structure](#-repository-structure)
-8. [Installation](#-installation)
-9. [How to Run](#-how-to-run)
-10. [Output Format](#-output-format)
-11. [Documentation](#-documentation)
+1. [Overview](#overview)
+2. [How It Works](#how-it-works)
+3. [System Flowchart](#system-flowchart)
+4. [Detected Fields & Sample Output](#detected-fields--sample-output)
+5. [Model Performance](#model-performance-yolov8)
+6. [Tech Stack](#tech-stack)
+7. [Repository Structure](#repository-structure)
+8. [Installation](#installation)
+9. [How to Run](#how-to-run)
+10. [Output Format](#output-format)
+11. [Documentation](#documentation)
 
 ---
 
-## 🔍 Overview
+## Overview
 
 ChequeTrak is a modular, end-to-end cheque processing system designed to automate what is traditionally a manual, error-prone banking task. The system:
 
@@ -34,7 +34,7 @@ The pipeline achieves an **average mAP@0.5 of ~0.960** across all 8 detection mo
 
 ---
 
-## ⚙️ How It Works
+## How It Works
 
 The system uses a 4-stage AI pipeline:
 
@@ -72,7 +72,7 @@ Both paths merge into the same **normalization → validation → export** pipel
 
 ---
 
-## 🔄 System Flowchart
+## System Flowchart
 
 The diagram below shows the complete processing flow from cheque input to final bank verdict:
 
@@ -85,7 +85,7 @@ Key decision points:
 
 ---
 
-## 🎯 Detected Fields & Sample Output
+## Detected Fields & Sample Output
 
 The pipeline detects and extracts **8 fields** from every cheque:
 
@@ -108,7 +108,7 @@ The image below shows the system detecting all 8 fields on a specimen cheque, an
 
 ---
 
-## 📈 Model Performance (YOLOv8)
+## Model Performance (YOLOv8)
 
 All models were trained using **YOLOv8 Nano** — one model per cheque field. Below is a summary of the precision-recall evaluation:
 
@@ -149,7 +149,7 @@ All models were trained using **YOLOv8 Nano** — one model per cheque field. Be
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Technology | Purpose |
 |-----------|---------|
@@ -165,7 +165,7 @@ All models were trained using **YOLOv8 Nano** — one model per cheque field. Be
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```text
 Intelligent_Cheque_Data_Extractor/
@@ -210,7 +210,7 @@ Intelligent_Cheque_Data_Extractor/
 
 ---
 
-## 🚀 Installation
+## Installation
 
 ### Prerequisites
 
@@ -227,7 +227,7 @@ pip install ultralytics paddleocr paddlepaddle opencv-python streamlit numpy pan
 
 ---
 
-## ▶️ How to Run
+## How to Run
 
 ### Option 1 — Batch Processing (Streamlit Web App)
 
@@ -261,7 +261,7 @@ Extracts only the MICR band from a cheque. Edit `sample_image` inside the `__mai
 
 ---
 
-## 📄 Output Format
+## Output Format
 
 For each processed image, the pipeline produces a row with these columns:
 
@@ -282,7 +282,7 @@ Results are saved as `<folder_name>.csv` inside the input folder.
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 | Document | Description |
 |----------|-------------|
@@ -292,7 +292,7 @@ Results are saved as `<folder_name>.csv` inside the input folder.
 
 ---
 
-## 📝 Notes
+## Notes
 
 - All model weights are stored locally in `Models/` — no internet connection needed at inference time
 - The normalization layer is designed to be robust against common OCR errors on handwritten cheques

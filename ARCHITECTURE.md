@@ -1,4 +1,4 @@
-# 🏗️ System Architecture — Intelligent Cheque Data Extractor
+# System Architecture — Intelligent Cheque Data Extractor
 
 This document provides a deep-dive into how the system is designed, how data flows through it, and how each component was built.
 

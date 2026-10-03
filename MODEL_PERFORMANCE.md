@@ -1,4 +1,4 @@
-# 📊 Model Performance — YOLOv8 Precision-Recall Analysis
+# Model Performance — YOLOv8 Precision-Recall Analysis
 
 This document presents the training evaluation results for all 8 YOLOv8 models used in the Intelligent Cheque Data Extractor pipeline. Each model was trained independently as a single-class detector for one specific cheque field.
 
@@ -8,14 +8,14 @@ This document presents the training evaluation results for all 8 YOLOv8 models u
 
 | Model | Field Detected | mAP@0.5 | Rating |
 |-------|---------------|---------|--------|
-| `amt_word.pt` | Amount in Words | **0.991** | ⭐ Excellent |
-| `acc_no.pt` | Account Number | **0.990** | ⭐ Excellent |
-| `pay.pt` | Payee Name | **0.984** | ⭐ Excellent |
-| `date.pt` | Date Field | **0.984** | ⭐ Excellent |
-| `amt_digit.pt` | Amount in Digits | **0.970** | ✅ Very Good |
-| `micr.pt` | MICR Band | **0.961** | ✅ Very Good |
-| `acc_holder.pt` | Account Holder | **0.919** | ✅ Good |
-| `sign.pt` | Signature Region | **0.876** | ✅ Good |
+| `amt_word.pt` | Amount in Words | **0.991** | Excellent |
+| `acc_no.pt` | Account Number | **0.990** | Excellent |
+| `pay.pt` | Payee Name | **0.984** | Excellent |
+| `date.pt` | Date Field | **0.984** | Excellent |
+| `amt_digit.pt` | Amount in Digits | **0.970** | Very Good |
+| `micr.pt` | MICR Band | **0.961** | Very Good |
+| `acc_holder.pt` | Account Holder | **0.919** | Good |
+| `sign.pt` | Signature Region | **0.876** | Good |
 
 > **Average mAP@0.5 across all models: ~0.960**
 
