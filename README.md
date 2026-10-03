@@ -1,72 +1,96 @@
 # ChequeTrak — Intelligent Cheque Data Extractor
 
-> An AI-powered cheque processing pipeline that automatically detects, extracts, normalizes, and validates data from scanned cheque images using YOLOv8 + PaddleOCR.
+> An end-to-end AI pipeline for automated cheque field detection, OCR extraction, text normalization, and validation using YOLOv8 and multiple OCR models.
 
 ---
 
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [How It Works](#how-it-works)
-3. [System Flowchart](#system-flowchart)
-4. [Detected Fields & Sample Output](#detected-fields--sample-output)
-5. [Model Performance](#model-performance-yolov8)
-6. [Tech Stack](#tech-stack)
-7. [Repository Structure](#repository-structure)
-8. [Installation](#installation)
-9. [How to Run](#how-to-run)
-10. [Output Format](#output-format)
-11. [Documentation](#documentation)
+2. [Research Publication](#research-publication)
+3. [How It Works](#how-it-works)
+4. [System Flowchart](#system-flowchart)
+5. [Detected Fields & Sample Output](#detected-fields--sample-output)
+6. [Model Performance](#model-performance-yolov8)
+7. [Tech Stack](#tech-stack)
+8. [Repository Structure](#repository-structure)
+9. [Installation](#installation)
+10. [How to Run](#how-to-run)
+11. [Output Format](#output-format)
+12. [Documentation](#documentation)
+13. [Notes](#notes)
 
 ---
 
 ## Overview
 
-ChequeTrak is a modular, end-to-end cheque processing system designed to automate what is traditionally a manual, error-prone banking task. The system:
+ChequeTrak is a modular, end-to-end cheque processing system designed to automate cheque data extraction and validation. The system:
 
-- **Detects** all key cheque fields using 8 specialized YOLOv8 models
-- **Extracts** text using PaddleOCR on each detected region
+- **Detects** key cheque fields using 8 specialized YOLOv8 models
+- **Extracts** text using PaddleOCR, EasyOCR, and TrOCR on detected regions
 - **Normalizes** raw OCR output (corrects dates, numeric amounts, OCR character errors)
 - **Validates** cheques by cross-checking amount-in-words vs. amount-in-digits
-- **Exports** results as a structured CSV, ready for downstream bank processing
+- **Exports** results as a structured CSV for downstream processing
 
 The pipeline achieves an **average mAP@0.5 of ~0.960** across all 8 detection models.
 
 ---
 
+## Research Publication
+
+ChequeTrak was developed as part of research presented in:
+
+> **ChequeTrak: An Integrated Deep Learning Pipeline for Handwritten Text Extraction and Signature Region Extraction in Indian Bank Cheques**
+
+Published at the **2026 2nd International Conference on Computing, Communication and Green Engineering (CCGE)**.
+
+The research focuses on applying deep learning, object detection, OCR, and image-processing techniques to automated cheque information extraction.
+
+---
+
 ## How It Works
 
-The system uses a 4-stage AI pipeline:
+The system operates through a structured 4-stage pipeline:
 
-```
+```text
 Cheque Image
-     |
-     v
-[Stage 1] YOLO Detection      — 8 models locate each field
-     |
-     v
-[Stage 2] PaddleOCR           — reads text from each cropped region
-     |
-     v
-[Stage 3] Text Normalization  — cleans dates, fixes OCR errors, converts word-amounts
-     |
-     v
-[Stage 4] Validation          — cross-checks amount-in-words == amount-in-digits
-     |
-     v
+     │
+     ▼
+[Stage 1] Cheque Field Detection  — 8 specialized YOLO models locate each field
+     │
+     ▼
+[Stage 2] OCR Extraction          — PaddleOCR / EasyOCR / TrOCR extracts text
+     │
+     ▼
+[Stage 3] Text Normalization      — cleans dates, fixes OCR errors, converts word amounts
+     │
+     ▼
+[Stage 4] Validation              — cross-checks amount-in-words == amount-in-digits
+     │
+     ▼
   CSV Output + Streamlit UI
 ```
 
-### The Dual-Path Design
+### Pipeline Stages
 
-The system was architected with a **fallback OCR path**:
+- **Stage 1 — Cheque Field Detection**: 8 specialized YOLOv8 models detect and crop distinct bounding regions from the cheque image (payee name, amounts, date, account holder, account number, signature, and MICR band).
+- **Stage 2 — OCR Extraction**: Text extraction is executed on the cropped regions using a multi-model OCR architecture.
+- **Stage 3 — Text Normalization**: Raw OCR strings are cleaned, correcting character errors, parsing date formats into standard `dd-mm-yyyy` representation, and converting written amount words to numeric values.
+- **Stage 4 — Validation**: The system cross-references the numeric value derived from words against the numerical amount digits to verify consistency.
+
+### OCR Architecture & Dual-Path Design
+
+The OCR processing layer incorporates multiple engines:
+- **PaddleOCR**: Primary OCR engine for fast and accurate text recognition across detected fields.
+- **EasyOCR**: Fallback recognition path used when detection confidence or alternative extraction is needed.
+- **TrOCR**: Transformer-based OCR model utilized for handwriting-oriented recognition on cheque fields.
 
 | Path | When Used | Technologies |
 |------|-----------|-------------|
 | **Primary** | YOLO successfully detects fields | YOLOv8 + PaddleOCR |
 | **Fallback** | YOLO detection confidence is too low | EasyOCR + TrOCR |
 
-Both paths merge into the same **normalization → validation → export** pipeline.
+Both paths merge into the same normalization, validation, and export pipeline.
 
 > For full technical details, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
@@ -74,14 +98,14 @@ Both paths merge into the same **normalization → validation → export** pipel
 
 ## System Flowchart
 
-The diagram below shows the complete processing flow from cheque input to final bank verdict:
+The diagram below shows the complete processing flow from cheque input to final validation:
 
 ![System Flowchart](Assets/flowchart.jpeg)
 
 Key decision points:
-- **Detect?** — Routes to YOLO+PaddleOCR or fallback OCR
-- **Amounts Match?** — Cross-validation for fraud detection
-- **User MICR Match?** — Final bank-level verification
+- **Detect?** - Routes to YOLO+PaddleOCR or fallback OCR
+- **Amounts Match?** - Cross-validation for word and digit amounts
+- **User MICR Match?** - Cheque routing and identity verification
 
 ---
 
@@ -128,21 +152,21 @@ All models were trained using **YOLOv8 Nano** — one model per cheque field. Be
 ### Precision-Recall Curves
 
 ````carousel
-![Amount in Words — mAP@0.5: 0.991](Assets/AMT_WORD.png)
+![Amount in Words - mAP@0.5: 0.991](Assets/AMT_WORD.png)
 <!-- slide -->
-![Account Number — mAP@0.5: 0.990](Assets/ACC_no.png)
+![Account Number - mAP@0.5: 0.990](Assets/ACC_no.png)
 <!-- slide -->
-![Payee Name — mAP@0.5: 0.984](Assets/Pay.png)
+![Payee Name - mAP@0.5: 0.984](Assets/Pay.png)
 <!-- slide -->
-![Date Field — mAP@0.5: 0.984](Assets/date.png)
+![Date Field - mAP@0.5: 0.984](Assets/date.png)
 <!-- slide -->
-![Amount in Digits — mAP@0.5: 0.970](Assets/AMT_digit.png)
+![Amount in Digits - mAP@0.5: 0.970](Assets/AMT_digit.png)
 <!-- slide -->
-![MICR Band — mAP@0.5: 0.961](Assets/MICR.png)
+![MICR Band - mAP@0.5: 0.961](Assets/MICR.png)
 <!-- slide -->
-![Account Holder — mAP@0.5: 0.919](Assets/ACC_holder.png)
+![Account Holder - mAP@0.5: 0.919](Assets/ACC_holder.png)
 <!-- slide -->
-![Signature — mAP@0.5: 0.876](Assets/sign.png)
+![Signature - mAP@0.5: 0.876](Assets/sign.png)
 ````
 
 > For detailed analysis of each model, see [MODEL_PERFORMANCE.md](MODEL_PERFORMANCE.md).
@@ -155,12 +179,14 @@ All models were trained using **YOLOv8 Nano** — one model per cheque field. Be
 |-----------|---------|
 | Python 3.x | Core language |
 | YOLOv8 (Ultralytics) | Cheque field detection |
-| PaddleOCR | Text recognition |
+| PaddleOCR | Primary text recognition engine |
+| EasyOCR | Fallback text recognition |
+| TrOCR | Transformer-based handwriting recognition |
 | OpenCV | Image loading, cropping, annotation |
 | Streamlit | Web interface for batch processing |
 | NumPy | Array operations |
 | Pandas | Tabular result export |
-| PyTorch | YOLO model backend |
+| PyTorch | Deep learning backend |
 | Python `difflib` | Fuzzy word matching for normalization |
 
 ---
@@ -194,14 +220,14 @@ Intelligent_Cheque_Data_Extractor/
 ├── Assets/                  # Images and diagrams
 │   ├── flowchart.jpeg       # System flowchart
 │   ├── metrics.jpeg         # Sample detection output on specimen cheque
-│   ├── ACC_holder.png       # PR curve — Account Holder model
-│   ├── ACC_no.png           # PR curve — Account Number model
-│   ├── AMT_WORD.png         # PR curve — Amount in Words model
-│   ├── AMT_digit.png        # PR curve — Amount in Digits model
-│   ├── MICR.png             # PR curve — MICR model
-│   ├── Pay.png              # PR curve — Payee Name model
-│   ├── date.png             # PR curve — Date model
-│   └── sign.png             # PR curve — Signature model
+│   ├── ACC_holder.png       # PR curve - Account Holder model
+│   ├── ACC_no.png           # PR curve - Account Number model
+│   ├── AMT_WORD.png         # PR curve - Amount in Words model
+│   ├── AMT_digit.png        # PR curve - Amount in Digits model
+│   ├── MICR.png             # PR curve - MICR model
+│   ├── Pay.png              # PR curve - Payee Name model
+│   ├── date.png             # PR curve - Date model
+│   └── sign.png             # PR curve - Signature model
 │
 ├── README.md                # This file
 ├── ARCHITECTURE.md          # Deep-dive: system design & pipeline details
@@ -294,11 +320,11 @@ Results are saved as `<folder_name>.csv` inside the input folder.
 
 ## Notes
 
-- All model weights are stored locally in `Models/` — no internet connection needed at inference time
-- The normalization layer is designed to be robust against common OCR errors on handwritten cheques
-- `conbiner.py` and `combiner2.py` are earlier experimental versions kept for reference
-- Confidence threshold defaults to `0.25`; increase it to reduce false positives on ambiguous fields
+- All model weights are stored locally in `Models/` — no internet connection needed at inference time.
+- The normalization layer is designed to be robust against common OCR errors on handwritten cheques.
+- `conbiner.py` and `combiner2.py` are earlier experimental versions kept for reference.
+- Confidence threshold defaults to `0.25`; increase it to reduce false positives on ambiguous fields.
 
 ---
 
-*Built with YOLOv8 + PaddleOCR for automated bank-grade cheque processing.*
+*Built with YOLOv8, OCR, and deep learning for automated cheque processing and validation.*
